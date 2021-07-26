@@ -6,7 +6,7 @@
 # sympy module includes rref() method
 import sympy as sp
 
-# create sympy matrix (all rows & columns independent)
+# create sympy matrix (all columns independent)
 M = sp.Matrix([[1, 2, 3], [4, 5, 5], [7, 8, 9], [1, 4, 7], [2, 5, 8]])
 B = M.col_join(2 * M)  # join matrices M & 2*M vertically -> B = [[M],[2M]]
 C1 = M.row_join(M)  # join M & M horizontally
