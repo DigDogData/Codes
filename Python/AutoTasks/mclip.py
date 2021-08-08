@@ -1,28 +1,46 @@
 #!/usr/bin/env python3
 
-# mclip.py - A multi-clipboard program
+# mclip.py - A multi-clipboard program (example that uses clipboard as IO)
 # run code with <python mclip.py [keyphrase]>
 
 import sys
-import pyperclip  # first install xclip with <sudo apt install xclip>
 
-# dictionary of texts with keys
-TEXT = {
-    "agree": """Yes, I agree. That sounds fine to me.""",
-    "busy": """Sorry, can we do this later this week or next week?""",
-    "upsell": """Would you consider making this a monthly donation?""",
-}
+try:
+    import pyperclip  # first install xclip with <sudo apt install xclip>
+except ImportError:
+    print("Install pyperclip module")
+    pass  # if pyperclip is not installed, do nothing
 
-# command line arguments are stored in sys.argv:
-# 1st item in sys.argv is filename 'mclip.py', 2nd item is keyphrase
-if len(sys.argv) < 2:
-    print("Usage: python mclip.py [keyphrase] - copy phrase text")
-    sys.exit()
 
-keyphrase = sys.argv[1]
+def main():
 
-if keyphrase in TEXT:
-    pyperclip.copy(TEXT[keyphrase])
-    print("Text for '" + keyphrase + "' copied to clipboard.")
-else:
-    print("There is no text for '" + keyphrase + "'.")
+    # dictionary of texts with keys
+    TEXT = {
+        "agree": """Yes, I agree. That sounds fine to me.""",
+        "busy": """Sorry, can we do this later this week or next week?""",
+        "upsell": """Would you consider making this a monthly donation?""",
+    }
+
+    # run copyToClipboard
+    copyToClipboard(TEXT)
+
+
+def copyToClipboard(text):
+
+    # sys.argv() is an array for command line arguments in python
+    # sys.argv[0] is filename 'mclip.py', sys.argv[1] is 1st command line argument
+    if len(sys.argv) < 2:
+        print("Usage: python mclip.py [keyphrase] - copy phrase text")
+        sys.exit()
+
+    keyphrase = sys.argv[1]  # assign 1st CL argument to keyphrase
+
+    if keyphrase in text:
+        pyperclip.copy(text[keyphrase])
+        print("Text for '" + keyphrase + "' copied to clipboard.")
+    else:
+        print("There is no text for '" + keyphrase + "'.")
+
+
+if __name__ == "__main__":
+    main()
