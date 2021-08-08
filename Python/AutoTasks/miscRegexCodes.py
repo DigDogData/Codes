@@ -1,6 +1,27 @@
 #!/usr/bin/env python3
 
 # miscRegexCodes.py - example codes for character-based pattern matching
+######################################################################################
+#   \d                  Matches a numeric digit (from 0 to 9)
+#   \D                  Matches a character that is NOT a (numeric) digit
+#   \w                  Matches a word (letter, numeric digit, or underscore)
+#   \W                  Matches a character that is NOT a letter, digit, or underscore
+#   \s                  Matches a space (whitespace, tab, or newline character)
+#   \S                  Matches a character that is NOT a space, tab, or newline
+#   ?                   Matches 0 or 1 of preceding group
+#   *                   Matches 0 or more of the preceding group
+#   +                   Matches 1 or more of the preceding group
+#   {n}                 Matches exactly n of the preceding group
+#   {n,}                Matches n or more of the preceding group
+#   {,m}                Matches 0 to m of the preceding group
+#   {n,m}               Matches at least n and at most m of the preceding group
+#   {n,m}? or *? or +?  Performs a non-greedy match of the preceding group
+#   ^spam               Means the string must begin with 'spam'
+#   spam$               Means the string must end with 'spam'
+#   .                   Matches any 1 character except newline characters
+#   [...]               Matches any character between the brackets
+#   [^...]              Matches any character that is NOT between the brackets
+######################################################################################
 
 import re  # import regex module
 
@@ -67,3 +88,35 @@ mo = noNewlineRegex.search(text2)
 print(mo.group())
 mo = newlineRegex.search(text2)
 print(mo.group())
+
+# case-insensitive matching (uses re.IGNORECASE or re.I)
+noCaseRegex = re.compile(r".op", re.I)
+text = "ROBOCOP is part man, part machine, all cop."
+mo = noCaseRegex.findall(text)
+print(mo)
+
+# substituting with sub() method
+namesRegex = re.compile(r"Agent \w+")
+text = "Agent Alice gave the secret documents to Agent Bob."
+mo = namesRegex.sub("******", text)  # replaces whole pattern
+print(mo)
+namesRegex = re.compile(r"Agent (\w)\w*")
+text = "Agent Alice gave the secret documents to Agent Bob."
+mo = namesRegex.sub(r"\1*****", text)  # replaces part of pattern ((\w) group)
+print(mo)
+
+# managing complex regex by ignoring inline comments (uses re.VERBOSE)
+phoneRegex = re.compile(
+    r"""(
+        (\d{3}|\(\d{3}\))?              # area code
+        (\s|-|\.)?                      # separator
+        \d{3}                           # first 3 digits
+        (\s|-|\.)                       # separator
+        \d{4}                           # last 4 digits
+        (\s*(ext|x|ext.)\s*\d{2,5})?    # extension
+        )""",
+    re.VERBOSE,
+)
+
+# combining mutiple arguments via piping (re.compile() takes only one 2nd argument)
+someRegexValue = re.compile("foo", re.IGNORECASE | re.DOTALL | re.VERBOSE)
