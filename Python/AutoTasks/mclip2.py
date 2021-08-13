@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 
-# mclip2.py - Modified mclip.py code that uses 'shelve' module:
-# save each piece of clipboard text under a keyword
-# run code with <python mclip2.py save [keyword]>
+# mclip2.py - Saves/loads pieces of text to/from clipboard
+# Usage: python mclip2.py save <keyword> - Saves clipboard to file
+#        python mclip2.py <keyword> - Loads keyword to clipboard
+#        python mclip2.py list - loads all keywords to clipboard
 
 import sys
+import shelve
 
 try:
     import pyperclip  # first install xclip with <sudo apt install xclip>
@@ -15,32 +17,23 @@ except ImportError:
 
 def main():
 
-    # dictionary of texts with keys
-    TEXT = {
-        "agree": """Yes, I agree. That sounds fine to me.""",
-        "busy": """Sorry, can we do this later this week or next week?""",
-        "upsell": """Would you consider making this a monthly donation?""",
-    }
-
-    # run copyToClipboard
-    copyToClipboard(TEXT)
+    mclip2Shelf = shelve.open("PyData/mclip2")  # file to save/load clipboard
+    fileToClipboard(mclip2Shelf)  # run code
+    mclip2Shelf.close()
 
 
-def copyToClipboard(text):
+def fileToClipboard(file):
 
-    # sys.argv() is an array for command line arguments in python
-    # sys.argv[0] is filename 'mclip.py', sys.argv[1] is 1st command line argument
-    if len(sys.argv) < 2:
-        print("Usage: python mclip.py [keyphrase] - copy phrase text")
-        sys.exit()
+    # save clipboard to file (if 2 command line arguments)
+    if len(sys.argv) == 3 and sys.argv[1].lower() == "save":
+        file[sys.argv[2]] = pyperclip.paste()
 
-    keyphrase = sys.argv[1]  # assign 1st CL argument to keyphrase
-
-    if keyphrase in text:
-        pyperclip.copy(text[keyphrase])
-        print("Text for '" + keyphrase + "' copied to clipboard.")
-    else:
-        print("There is no text for '" + keyphrase + "'.")
+    # list/load clipboard content (if only 1 command line argument)
+    elif len(sys.argv) == 2:
+        if sys.argv[1].lower() == "list":
+            pyperclip.copy(str(list(file.keys())))  # list content
+        elif sys.argv[1] in file:
+            pyperclip.copy(file[sys.argv[1]])  # load keyword if exists
 
 
 if __name__ == "__main__":

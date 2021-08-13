@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
 # mclip.py - A multi-clipboard program (example that uses clipboard as IO)
-# run code with <python mclip.py [keyphrase]>
+# Usage: python mclip.py <keyword> - Copy keyword text to clipboard
 
 import sys
 
@@ -30,16 +30,16 @@ def copyToClipboard(text):
     # sys.argv() is an array for command line arguments in python
     # sys.argv[0] is filename 'mclip.py', sys.argv[1] is 1st command line argument
     if len(sys.argv) < 2:
-        print("Usage: python mclip.py [keyphrase] - copy phrase text")
+        print("Usage: python mclip.py [keyword] - copy phrase text")
         sys.exit()
 
-    keyphrase = sys.argv[1]  # assign 1st CL argument to keyphrase
+    keyword = sys.argv[1]  # assign 1st CL argument to keyword
 
-    if keyphrase in text:
-        pyperclip.copy(text[keyphrase])
-        print("Text for '" + keyphrase + "' copied to clipboard.")
+    if keyword in text:
+        pyperclip.copy(text[keyword])
+        print("Text for '" + keyword + "' copied to clipboard.")
     else:
-        print("There is no text for '" + keyphrase + "'.")
+        print("There is no text for '" + keyword + "'.")
 
 
 if __name__ == "__main__":
