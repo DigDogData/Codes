@@ -2,4 +2,6 @@
 .Rhistory
 Pipfile*
 PyData/
+test/
 QuizFiles/
+Backup/
