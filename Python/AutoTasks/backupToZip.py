@@ -25,7 +25,8 @@ def backupToZip(folder):
     print(f"Creating '{zipFilename}'...")
     backupZip = zipfile.ZipFile(zipFilename, "w")
 
-    # walk folder tree ('arcname' argument avoids archiving absolute path)
+    # walk folder tree and add to zipped file
+    # ('arcname' argument avoids archiving absolute path)
     for foldername, subfolders, filenames in os.walk(folder):
         # print(f"Adding files in {foldername}...")
         parentPath = os.path.relpath(foldername, folder)
