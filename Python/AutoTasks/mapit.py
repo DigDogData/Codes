@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-# mapit.py - Launches a map in the browser using address from command line / clipboard
-# Example : <mapit 870 Valencia St, San Francisco, CA 94110>
+# mapit.py - Launches a map in the browser using address from command line/clipboard
+# Example : <python mapit.py 870 Valencia St, San Francisco, CA 94110>
 
 import sys
 import webbrowser
@@ -12,7 +12,7 @@ except ImportError:
     print("Install pyperclip module")
     pass  # if pyperclip is not installed, do nothing
 
-if len(sys.argv) > 1:
+if len(sys.argv) > 1:  # argument is more than 'mapit.py'
     # get address from command line
     address = " ".join(sys.argv[1:])
 else:
