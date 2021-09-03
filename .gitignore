@@ -1,9 +1,7 @@
 .RData
 .Rhistory
-*.png
 Pipfile*
 PyData/
 test/
 QuizFiles/
 Backup/
-models/
