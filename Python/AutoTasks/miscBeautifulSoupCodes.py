@@ -21,15 +21,15 @@ exampleFile = open("example.html")
 exampleSoup = bs4.BeautifulSoup(exampleFile, "lxml")
 # exampleSoup = bs4.BeautifulSoup(exampleFile, "html.parser")
 print(type(exampleSoup))
-elems = exampleSoup.select("#author")  # get list of tags with id="author"
+elems = exampleSoup.select("#author")  # select list of tags with id="author"
 print(type(elems))
 print(len(elems))
 print(type(elems[0]))
 print(str(elems[0]))
-print(elems[0].getText())
+print(elems[0].getText())  # get text string of this element
 print(elems[0].attrs)
 
-pElems = exampleSoup.select("p")  # get list of all <p> elements
+pElems = exampleSoup.select("p")  # select list of all <p> elements
 print(len(pElems))
 print(str(pElems[0]))
 print(pElems[0].getText())
