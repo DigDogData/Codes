@@ -20,9 +20,9 @@ soup = bs4.BeautifulSoup(res.text, "lxml")
 
 # open a browser tab for each result
 # use browser's developer tools to inspect link elements, and select
-# only relevant elemenst that contain string 'package-snippet'
+# only relevant elements that contain string 'package-snippet'
 linkElems = soup.select(".package-snippet")
-numOpen = min(5, len(linkElems))
+numOpen = min(5, len(linkElems))  # open at least 5 tabs
 for i in range(numOpen):
     urlToOpen = "https://pypi.org" + linkElems[i].get("href")
     print("Opening", urlToOpen)
