@@ -31,6 +31,7 @@ def searchpypi(url, num):
     # open a browser tab for each result
     # use browser's developer tools to inspect link elements, and select
     # only relevant elements that contain string 'package-snippet'
+    # (this code may need changing if pypi.org does any code update)
     linkElems = soup.select(".package-snippet")
     # print(len(linkElems))
     # print(linkElems[0].get("href"))
