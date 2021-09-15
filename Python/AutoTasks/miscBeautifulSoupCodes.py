@@ -16,7 +16,7 @@ noStarchSoup = bs4.BeautifulSoup(res.text, "lxml")
 # noStarchSoup = bs4.BeautifulSoup(res.text, "html.parser")
 print(type(noStarchSoup))
 
-# read html file and parse using bs4.BeautifulSoup()
+# read html file, pass to bs4.BeautifulSoup() and extract elements
 exampleFile = open("example.html")
 exampleSoup = bs4.BeautifulSoup(exampleFile, "lxml")
 # exampleSoup = bs4.BeautifulSoup(exampleFile, "html.parser")
@@ -35,3 +35,10 @@ print(str(pElems[0]))
 print(pElems[0].getText())
 print(pElems[1].getText())
 print(pElems[2].getText())
+
+soup = bs4.BeautifulSoup(open("example.html"), "lxml")
+spanElem = soup.select("span")[0]
+print(str(spanElem))
+print(spanElem.get("id"))
+print(spanElem.get("some_nonexistent_addr") is None)
+print(spanElem.attrs)
