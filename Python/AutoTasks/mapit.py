@@ -20,6 +20,6 @@ else:
     address = pyperclip.paste()
 
 url = "https://www.google.com/maps/place/" + address
-webbrowser.open(url)
+webbrowser.open(url)  # ignore console error messages (debian bug)
 # webbrowser.open_new(url)
 # webbrowser.open_new_tab(url)
