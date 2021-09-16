@@ -29,6 +29,8 @@ try:
 except Exception as exc:
     print("There was a problem: %s" % (exc))
 playFile = open("RomeoAndJuliet.txt", "wb")
+# (iter_content() method returns 'chunks' of content on each iteration of
+# the loop, and the size of each chunk is specified to be 100000 bytes)
 for chunk in res.iter_content(100000):
     playFile.write(chunk)
 playFile.close()
