@@ -28,7 +28,7 @@ try:
     res.raise_for_status()
 except Exception as exc:
     print("There was a problem: %s" % (exc))
-playFile = open("RomeoAndJuliet.txt", "wb")
+playFile = open("RomeoAndJuliet.txt", "wb")  # 'wb' (write binary) mode
 # (iter_content() method returns 'chunks' of content on each iteration of
 # the loop, and the size of each chunk is specified to be 100000 bytes)
 for chunk in res.iter_content(100000):
