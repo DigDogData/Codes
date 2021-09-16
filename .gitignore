@@ -1,5 +1,6 @@
 .RData
 .Rhistory
+*.log
 Pipfile*
 PyData/
 test/

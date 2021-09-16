@@ -46,3 +46,47 @@ def raiseStatus(response):
         response.raise_for_status()  # call raise_for_status() on response object
     except Exception as exc:
         print("There was a problem: %s" % (exc))
+    return None
+
+
+# This function initiates browser for selenium:
+# To use Brave browser, download binary file 'chromedriver' from
+# https://sites.google.com/chromium.org/driver/ and add its path
+# (chromedriver version must match Chromium version in Brave: Menu->About Brave).
+# To use Firefox browser, download binary file 'geckodriver' from
+# https://github.com/mozilla/geckodriver/releases and add its path.
+def startBrowser(browserType):
+    from selenium import webdriver
+    from selenium.webdriver.chrome.service import Service
+
+    if browserType.lower() == "brave":
+        # initialize Brave browser
+        driverPath = "/home/roy/Downloads/chromedriver"
+        bravePath = "/usr/bin/brave-browser"
+        profilePath = "/home/roy/.config/BraveSoftware/Brave-Browser"
+        options = webdriver.ChromeOptions()
+        options.binary_location = bravePath
+        options.add_argument("user-data-dir=" + profilePath)
+        options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        return webdriver.Chrome(service=Service(driverPath), options=options)
+    else:
+        # initialize Firefox browser
+        driverPath = "/home/roy/Downloads/geckodriver"
+        profile = webdriver.FirefoxProfile(
+            "/home/roy/.mozilla/firefox/9gm5swsg.default-release"
+        )
+        return webdriver.Firefox(profile, service=Service(driverPath))
+
+
+# This function enters login ID and password to a website
+def loginToSite(browser, userId, password):
+    import pyinputplus as pyip
+    from selenium.webdriver.common.by import By
+
+    userElem = browser.find_element(By.ID, userId)
+    userId = pyip.inputStr("User ID: ")
+    userElem.send_keys(userId)
+    passwordElem = browser.find_element(By.ID, password)
+    passwd = pyip.inputPassword("Password: ")
+    passwordElem.send_keys(passwd)
+    passwordElem.submit()
