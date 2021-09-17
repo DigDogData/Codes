@@ -42,10 +42,12 @@ def image_spoof(self, tile):
 
 # This function checks for download error with requests.get() method
 def raiseStatus(response):
+    import sys
+
     try:
         response.raise_for_status()  # call raise_for_status() on response object
     except Exception as exc:
-        print("There was a problem: %s" % (exc))
+        sys.exit("There was a problem: %s" % (exc))
 
 
 # This function initiates browser for selenium:

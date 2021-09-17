@@ -6,10 +6,7 @@ import sys
 import time
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
-
-# import user-created library 'Libs'
-sys.path.append("/home/roy/Documents/DS/Codes/Python/Libs")
-from util import startBrowser  # noqa E402
+from util import startBrowser
 
 # *** make sure no other browser instance is open ***
 # url = "https://inventwithpython.com"
