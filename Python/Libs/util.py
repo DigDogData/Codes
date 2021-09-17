@@ -46,7 +46,6 @@ def raiseStatus(response):
         response.raise_for_status()  # call raise_for_status() on response object
     except Exception as exc:
         print("There was a problem: %s" % (exc))
-    return None
 
 
 # This function initiates browser for selenium:
