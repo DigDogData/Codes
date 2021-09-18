@@ -51,43 +51,29 @@ def downloadImgur(url):
     print("There are %s images about '%s'." % (image_count, category))
     print("Downloading first %s images..." % limit)
     print("------------------------------------------")
-    image_list = soup.select(".post > .image-list-link")
+    image_list = soup.select(".image-list-link > img")
 
     os.makedirs("imgur", exist_ok=True)  # create ./imgur directory
 
-    # loop through image thumbnails and make request to image source
+    # loop through images and download each image
     for i in range(int(limit)):
-        thumbnail = image_list[i]
-        image_url = url + thumbnail.get("href")
+        image = image_list[i]
+        image_url = "https:" + image.get("src")
         logging.info("Image URL: " + image_url)
 
+        # make request to image source
         try:
-            # make request to image source
             image_res = requests.get(image_url)
             image_res.raise_for_status()
-            image_soup = bs4.BeautifulSoup(image_res.text, "lxml")
-            image = image_soup.select("img")  # get image
-            print(str(image))
-            # image_location = image[0].get("src")
-            # logging.info("Image Location: " + image_location)
-            continue
-
-            # make request to image location and download image
-            try:
-                image_res2 = requests.get(image_location)
-                image_res2.raise_for_status()
-                image_name = os.path.basename(image_location)
-                imageFile = open(os.path.join("imgur", image_name), "wb")
-                for chunk in image_res.iter_content(100000):
-                    imageFile.write(chunk)
-                imageFile.close()
-                logging.info("Image " + image_name + " saved.")
-            except Exception as err:
-                logging.error("Image Download Error: " + str(err))
-                pass
-
+            image_name = os.path.basename(image_url)
+            imageFile = open(os.path.join("imgur", image_name), "wb")
+            for chunk in image_res.iter_content(100000):
+                imageFile.write(chunk)
+            imageFile.close()
+            logging.info("Image " + image_name + " saved.")
         except Exception as err:
-            logging.error("Image URL Access Error: " + str(err))
+            logging.error("Image Download Error: " + str(err))
+            pass
 
 
 if __name__ == "__main__":
