@@ -56,7 +56,8 @@ def raiseStatus(response):
 # (chromedriver version must match Chromium version in Brave: Menu->About Brave).
 # To use Firefox browser, download binary file 'geckodriver' from
 # https://github.com/mozilla/geckodriver/releases and add its path.
-def startBrowser(browserType):
+def startBrowser(browserType, headless=False):
+    import platform
     from selenium import webdriver
     from selenium.webdriver.chrome.service import Service
 
@@ -68,15 +69,22 @@ def startBrowser(browserType):
         options = webdriver.ChromeOptions()
         options.binary_location = bravePath
         options.add_argument("user-data-dir=" + profilePath)
+        if headless:
+            options.add_argument("--headless")
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
         return webdriver.Chrome(service=Service(driverPath), options=options)
     else:
         # initialize Firefox browser
         driverPath = "/home/roy/Downloads/geckodriver"
-        profile = webdriver.FirefoxProfile(
-            "/home/roy/.mozilla/firefox/9gm5swsg.default-release"
-        )
-        return webdriver.Firefox(profile, service=Service(driverPath))
+        options = webdriver.FirefoxOptions()
+        if headless:
+            options.add_argument("--headless")
+        if platform.node() == "pc":
+            profilePath = "/home/roy/.mozilla/firefox/up27hajv.default-release"
+        else:
+            profilePath = "/home/roy/.mozilla/firefox/9gm5swsg.default-release"
+        profile = webdriver.FirefoxProfile(profilePath)
+        return webdriver.Firefox(profile, service=Service(driverPath), options=options)
 
 
 # This function enters login ID and password to a website

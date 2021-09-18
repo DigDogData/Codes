@@ -20,7 +20,8 @@ def main():
 
 def downloadXkcd(url0):
     url = url0
-    while not url.endswith("#"):  # 1st page URL ends with '#'
+    # while not url.endswith("#"):  # 1st page URL ends with '#'
+    for __ in range(10):  # download last 10 images
 
         # download page
         print("Downloading page %s..." % url)
