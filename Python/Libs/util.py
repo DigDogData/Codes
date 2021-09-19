@@ -61,7 +61,18 @@ def startBrowser(browserType, headless=False):
     from selenium import webdriver
     from selenium.webdriver.chrome.service import Service
 
-    if browserType.lower() == "brave":
+    if browserType.lower() == "chrome":
+        # initialize Chrome browser
+        driverPath = "/home/roy/Downloads/chromedriver"
+        chromePath = "/usr/bin/google-chrome-stable"
+        options = webdriver.ChromeOptions()
+        options.binary_location = chromePath
+        if headless:
+            options.add_argument("--headless")
+        # options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        return webdriver.Chrome(service=Service(driverPath), options=options)
+
+    elif browserType.lower() == "brave":
         # initialize Brave browser
         driverPath = "/home/roy/Downloads/chromedriver"
         bravePath = "/usr/bin/brave-browser"
@@ -73,6 +84,7 @@ def startBrowser(browserType, headless=False):
             options.add_argument("--headless")
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
         return webdriver.Chrome(service=Service(driverPath), options=options)
+
     else:
         # initialize Firefox browser
         driverPath = "/home/roy/Downloads/geckodriver"

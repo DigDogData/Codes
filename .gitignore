@@ -1,6 +1,7 @@
 .RData
 .Rhistory
 *.log
+*.mkv
 Pipfile*
 PyData/
 test/
