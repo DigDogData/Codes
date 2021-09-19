@@ -44,8 +44,8 @@ def downloadImgur(url, browser):
     # open category page in browser
     category_url = url + "/search?q=" + category
     browser.get(category_url)
-    htmlElem = browser.find_element(By.TAG_NAME, "html")
     # scroll down 2 times to expose more of category page
+    htmlElem = browser.find_element(By.TAG_NAME, "html")
     for __ in range(2):
         htmlElem.send_keys(Keys.END)  # scroll to bottom
         time.sleep(2)
