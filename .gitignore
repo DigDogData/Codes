@@ -2,6 +2,7 @@
 .Rhistory
 *.log
 *.mkv
+*.webm
 Pipfile*
 PyData/
 test/

@@ -6,13 +6,10 @@
 import sys
 import time
 import os
-import bs4
-import requests
 import logging
 from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from util import startBrowser
-from util import raiseStatus
 
 
 def main():
@@ -21,6 +18,13 @@ def main():
     os.makedirs("google", exist_ok=True)  # create ./google folder (to store images)
     searchGoogle(url, browser)
     # browser.quit()
+
+
+# auto scroll down 'num' times to expose more of page
+def scrollToEnd(browser, num):
+    for __ in range(num):
+        browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+        time.sleep(5)  # pause between interactions
 
 
 def searchGoogle(url, browser):
@@ -45,11 +49,11 @@ def searchGoogle(url, browser):
     keyword_url = url + "/search?q=" + keyword + appendUrl
     browser.get(keyword_url)
 
-    # auto scroll down few times to expose more of page
-    htmlElem = browser.find_element(By.TAG_NAME, "html")
-    for __ in range(2):
-        htmlElem.send_keys(Keys.END)
-        time.sleep(5)  # pause between interactions
+    scrollToEnd(browser, 2)
+    # htmlElem = browser.find_element(By.TAG_NAME, "html")
+    # for __ in range(2):
+    #     htmlElem.send_keys(Keys.END)
+    #     time.sleep(5)  # pause between interactions
 
     # find images to be scraped from page
     imgList = browser.find_elements(By.CLASS_NAME, "isv-r PNCib MSM1fd BUooTd")
