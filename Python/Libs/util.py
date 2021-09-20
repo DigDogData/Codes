@@ -40,37 +40,6 @@ def image_spoof(self, tile):
     return img, self.tileextent(tile), "lower"  # reformat for cartopy
 
 
-# This function checks for download error with requests.get() method
-def raiseStatus(response):
-    import sys
-
-    try:
-        response.raise_for_status()  # call raise_for_status() on response object
-    except Exception as exc:
-        sys.exit("There was a problem: %s" % (exc))
-
-
-# THis function sets up logging defaults
-def printLog(message, logLevel):
-    import logging
-
-    logging.basicConfig(
-        level=logging.DEBUG,
-        format="%(asctime)s - %(levelname)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
-    if logLevel == "debug":
-        return logging.debug(message)
-    elif logLevel == "info":
-        return logging.info(message)
-    elif logLevel == "warning":
-        return logging.warning(message)
-    elif logLevel == "error":
-        return logging.error(message)
-    else:
-        return logging.critical(message)
-
-
 # This function initiates browser for selenium:
 # To use Brave browser, download binary file 'chromedriver' from
 # https://sites.google.com/chromium.org/driver/ and add its path
@@ -78,7 +47,6 @@ def printLog(message, logLevel):
 # To use Firefox browser, download binary file 'geckodriver' from
 # https://github.com/mozilla/geckodriver/releases and add its path.
 def startBrowser(browserType, headless=False):
-    import platform
     from selenium import webdriver
     from selenium.webdriver.chrome.service import Service
 
@@ -97,10 +65,8 @@ def startBrowser(browserType, headless=False):
         # initialize Brave browser
         driverPath = "/home/roy/Downloads/chromedriver"
         bravePath = "/usr/bin/brave-browser"
-        profilePath = "/home/roy/.config/BraveSoftware/Brave-Browser"
         options = webdriver.ChromeOptions()
         options.binary_location = bravePath
-        options.add_argument("user-data-dir=" + profilePath)
         if headless:
             options.add_argument("--headless")
         options.add_experimental_option("excludeSwitches", ["enable-automation"])
@@ -112,12 +78,7 @@ def startBrowser(browserType, headless=False):
         options = webdriver.FirefoxOptions()
         if headless:
             options.add_argument("--headless")
-        if platform.node() == "pc":
-            profilePath = "/home/roy/.mozilla/firefox/up27hajv.default-release"
-        else:
-            profilePath = "/home/roy/.mozilla/firefox/9gm5swsg.default-release"
-        profile = webdriver.FirefoxProfile(profilePath)
-        return webdriver.Firefox(profile, service=Service(driverPath), options=options)
+        return webdriver.Firefox(service=Service(driverPath), options=options)
 
 
 # This function enters login ID and password to a website
