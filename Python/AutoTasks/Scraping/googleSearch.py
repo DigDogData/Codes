@@ -6,37 +6,32 @@
 import sys
 import time
 import os
-import logging
-from selenium.webdriver.common.keys import Keys
 from selenium.webdriver.common.by import By
 from util import startBrowser
+from util import printLog
 
 
 def main():
     url = "https://www.google.com"
-    browser = startBrowser("chrome", headless=False)  # Brave is buggy
     os.makedirs("google", exist_ok=True)  # create ./google folder (to store images)
+    browser = startBrowser("firefox", headless=False)  # Brave is buggy
     searchGoogle(url, browser)
     # browser.quit()
 
 
-# auto scroll down 'num' times to expose more of page
+# function to auto scroll down 'num' times to expose more of page
 def scrollToEnd(browser, num):
     for __ in range(num):
         browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(5)  # pause between interactions
 
 
-def searchGoogle(url, browser):
+# function to download ans save images
+def downloadImage(browser, url):
 
-    # set logging config
-    logging.basicConfig(
-        # level=logging.DEBUG,  # lowest logging level (includes DEBUG messages)
-        level=logging.INFO,  # next lowest level (excludes DEBUG messages)
-        format="%(asctime)s - %(levelname)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
-    # logging.disable(logging.CRITICAL)  # uncomment to disable logging
+
+
+def searchGoogle(url, browser):
 
     # get keyword from CLI
     if len(sys.argv) == 2:
@@ -50,27 +45,25 @@ def searchGoogle(url, browser):
     browser.get(keyword_url)
 
     scrollToEnd(browser, 2)
-    # htmlElem = browser.find_element(By.TAG_NAME, "html")
-    # for __ in range(2):
-    #     htmlElem.send_keys(Keys.END)
-    #     time.sleep(5)  # pause between interactions
 
     # find images to be scraped from page
-    imgList = browser.find_elements(By.CLASS_NAME, "isv-r PNCib MSM1fd BUooTd")
-    # imgList = browser.find_elements(By.XPATH, '//img[contains(@class, "Q4LuWd")]')
+    imgList = browser.find_elements(By.XPATH, '//img[contains(@class,"Q4LuWd")]')
 
     # loop through image thumbnails
-    for i in range(len(imgList)):
-        imgUrl = imgList[i]
+    # for i in range(len(imgList)):
+    for i in range(1):
+        thumbnail = imgList[i]
         try:
-            imgUrl.click()
+            thumbnail.click()
             time.sleep(2)
-            images = browser.find_elements(By.CSS_SELECTOR, "img.n3VNCb")
-            # for image in images:
-
-            # continue
-        except Exception:
-            sys.exit()
+            images = browser.find_elements(By.XPATH, '//img[contains(@class,"n3VNCb")]')
+            # of the two results, only the correct one has 'https' in its link
+            for image in images:
+                if image.get_attribute("src") and "https" in image.get_attribute("src"):
+                    imgUrl = image.get_attribute("src")
+        except Exception as err:
+            print(err)
+            continue
 
 
 if __name__ == "__main__":

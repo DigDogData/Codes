@@ -50,6 +50,27 @@ def raiseStatus(response):
         sys.exit("There was a problem: %s" % (exc))
 
 
+# THis function sets up logging defaults
+def printLog(message, logLevel):
+    import logging
+
+    logging.basicConfig(
+        level=logging.DEBUG,
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+    if logLevel == "debug":
+        return logging.debug(message)
+    elif logLevel == "info":
+        return logging.info(message)
+    elif logLevel == "warning":
+        return logging.warning(message)
+    elif logLevel == "error":
+        return logging.error(message)
+    else:
+        return logging.critical(message)
+
+
 # This function initiates browser for selenium:
 # To use Brave browser, download binary file 'chromedriver' from
 # https://sites.google.com/chromium.org/driver/ and add its path
