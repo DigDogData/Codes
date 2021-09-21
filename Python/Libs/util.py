@@ -82,7 +82,7 @@ def startBrowser(browserType, headless=False):
 
 
 # This function enters login ID and password to a website
-def loginToSite(browser, userId, password):
+def logMeIn(browser, userId, password):
     import pyinputplus as pyip
     from selenium.webdriver.common.by import By
 

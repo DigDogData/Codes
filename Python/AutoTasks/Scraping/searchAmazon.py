@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 
-# downloadGoogle.py - Download Google images by keyword
-# USAGE: py downloadGoogle.py <keyword> <limit>
+# searchAmazon.py - Search Amazon prices for 'wet cat food' =>
+# open Amazon, log into site, search for 'wet cat food', choose 'Purina Friskies'
+# as brand name and 'under $25' for price, then copy-paste the long link
 
 import sys
 import time
@@ -9,6 +10,7 @@ import os
 import requests
 import logging
 from selenium.webdriver.common.by import By
+from selenium.webdriver.common.action_chains import ActionChains
 from util import startBrowser
 
 
@@ -40,7 +42,7 @@ def downloadImage(image_url, folderName, logging):
 
 
 # funtion to search google
-def searchGoogle(keyword, limit, url, folderName, browser):
+def searchAmazon(keyword, limit, url, folderName, browser, action):
 
     # set logging config
     logging.basicConfig(
@@ -93,7 +95,8 @@ def main():
     folderName = "google"  # create ./google folder to store images
     os.makedirs(folderName, exist_ok=True)
     browser = startBrowser("firefox", headless=True)  # Brave is buggy
-    searchGoogle(keyword, limit, url, folderName, browser)
+    action = ActionChains(browser)
+    searchAmazon(keyword, limit, url, folderName, browser, action)
     browser.quit()
 
 
