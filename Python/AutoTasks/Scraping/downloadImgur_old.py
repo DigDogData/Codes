@@ -1,17 +1,13 @@
 #!/usr/bin/env python3
 
-# downloadImgur2.py - Downloads 'all' Imgur images based on category
-# (page dynamically scrolled to expose more of category thumbnails)
-# USAGE: py downloadImgur2.py <category>
+# downloadImgur.py - Downloads preset number of Imgur images based on category (used bs4)
+# USAGE: py downloadImgur.py <category> <limit>
 
 import sys
-import time
 import os
 import bs4
 import requests
 import logging
-from selenium.webdriver.common.keys import Keys
-from selenium.webdriver.common.by import By
 from util import startBrowser
 from util import raiseStatus
 
@@ -35,36 +31,38 @@ def downloadImgur(url, browser):
     )
     # logging.disable(logging.CRITICAL)  # uncomment to disable logging
 
-    # get category from CLI
-    if len(sys.argv) == 2:
+    # get category and limit from CLI
+    if len(sys.argv) == 3:
         category = sys.argv[1]
+        limit = sys.argv[2]
     else:
-        sys.exit("USAGE: python downloadImgur2.py <category>")
+        sys.exit("USAGE: python downloadImgur.py <category> <limit>")
 
-    # open category page in browser
+    # make request to category page
     category_url = url + "/search?q=" + category
-    browser.get(category_url)
-    # scroll down 2 times to expose more of category page
-    htmlElem = browser.find_element(By.TAG_NAME, "html")
-    for __ in range(2):
-        htmlElem.send_keys(Keys.END)  # scroll to bottom
-        time.sleep(2)
+    logging.info("Category Page URL: " + category_url)
+    try:
+        category_res = requests.get(category_url)
+        raiseStatus(category_res)
+    except Exception as err:
+        logging.error(str(err))
+        sys.exit(1)
 
-    # parse page with bs4
-    thumb_soup = bs4.BeautifulSoup(browser.page_source, "lxml")
+    # find all image thumbnails for this category
+    thumb_soup = bs4.BeautifulSoup(category_res.content, "lxml")
     image_count_elem = thumb_soup.select(".sorting-text-align > i")
     image_count = image_count_elem[0].getText()
-    image_list = thumb_soup.select(".post > .image-list-link")
-    limit = len(image_list)
     print("------------------------------------------")
     print("There are %s images about '%s'." % (image_count, category))
     print("Downloading first %s images..." % limit)
     print("------------------------------------------")
+    image_list = thumb_soup.select(".post > .image-list-link")
 
     # loop through image thumbnails
-    for i in range(limit):
+    for i in range(int(limit)):
         thumbElem = image_list[i]
         page_url = url + thumbElem.get("href")
+        logging.info("Image Page URL: " + page_url)
 
         # open image page in browser (because of scripting, page source
         # must be accessed from loaded page)
@@ -75,6 +73,7 @@ def downloadImgur(url, browser):
             logging.warning("Page does not have image. Skipping...")
             continue
         image_url = image_elem[0].get("src")
+        logging.info("Image URL: " + image_url)
 
         # download image
         try:
@@ -85,7 +84,7 @@ def downloadImgur(url, browser):
             for chunk in image_res.iter_content(100000):
                 imageFile.write(chunk)
             imageFile.close()
-            logging.info("Image(#%s) '%s' saved.", i + 1, image_name)
+            logging.info("Image '" + image_name + "' saved.")
         except Exception as err:
             logging.error("Image Download Error: " + str(err))
 

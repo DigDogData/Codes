@@ -20,7 +20,7 @@ def scrollToEnd(browser, num):
 
 
 # function to download and save image (uses requests)
-def downloadImage(i, image_url, folderName, logging):
+def downloadImage(image_url, folderName, logging):
     try:
         image_res = requests.get(image_url, timeout=10)
         try:
@@ -30,7 +30,7 @@ def downloadImage(i, image_url, folderName, logging):
             for chunk in image_res.iter_content(100000):
                 imageFile.write(chunk)
             imageFile.close()
-            logging.info("Image(#%s) '%s' saved.", i + 1, image_name)
+            logging.info("Image '%s' saved.", image_name)
         except Exception as err:  # if there is connection error
             logging.error("Connection Error: " + str(err))
             pass
@@ -73,9 +73,9 @@ def searchGoogle(keyword, limit, url, folderName, browser):
                 image_src = image.get_attribute("src")
                 # get *correct* link (with 'https' and without 'gstatic.com')
                 if "https" in image_src and "gstatic.com" not in image_src:
-                    imgUrl = image.get_attribute("src")
+                    imgUrl = image_src
             logging.info("Image Source '%s' ==>", imgUrl.split("/")[2])
-            downloadImage(i, imgUrl, folderName, logging)
+            downloadImage(imgUrl, folderName, logging)
         except Exception as err:
             logging.error(str(err))
             continue  # skip to beginning of loop

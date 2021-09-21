@@ -58,7 +58,7 @@ def startBrowser(browserType, headless=False):
         options.binary_location = chromePath
         if headless:
             options.add_argument("--headless")
-        # options.add_experimental_option("excludeSwitches", ["enable-automation"])
+        options.add_experimental_option("excludeSwitches", ["enable-automation"])
         return webdriver.Chrome(service=Service(driverPath), options=options)
 
     elif browserType.lower() == "brave":
