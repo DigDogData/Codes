@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-# downloadImgur.py - Download Imgur images by keyword (uses selenium)
-# USAGE: py downloadImgur.py <keyword> <limit>
+# downloadGoogle.py - Download Google images by keyword
+# USAGE: py downloadGoogle.py <keyword> <limit>
 
 import sys
 import time
@@ -17,18 +17,6 @@ def scrollToEnd(browser, num):
     for __ in range(num):
         browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
         time.sleep(5)  # pause between interactions
-
-
-# function to print image count for keyword
-def showImageCount(browser, keyword, limit):
-    imgCountElem = browser.find_elements(
-        By.XPATH, '//span[contains(@class,"sorting-text-align")]//i'
-    )
-    imgCount = imgCountElem[0].get_attribute("innerHTML")
-    print("------------------------------------------")
-    print("There are %s images about '%s'." % (imgCount, keyword))
-    print("Downloading first %s images..." % limit)
-    print("------------------------------------------")
 
 
 # function to download and save image (uses requests)
@@ -51,8 +39,8 @@ def downloadImage(image_url, folderName, logging):
         pass
 
 
-# function to search Imgur
-def searchImgur(keyword, limit, url, folderName, browser):
+# funtion to search google
+def searchGoogle(keyword, limit, url, folderName, browser):
 
     # set logging config
     logging.basicConfig(
@@ -64,34 +52,30 @@ def searchImgur(keyword, limit, url, folderName, browser):
     # logging.disable(logging.CRITICAL)  # uncomment to disable logging
 
     # open keyword page in browser
-    keyword_url = url + "/search?q=" + keyword
+    appendUrl = "&source=lnms&tbm=isch&sa=X&ved=2ahUKEwi8-rSt-onzAhUGXM0KHbA6A3wQ_AUoAXoECAIQAw&biw=1794&bih=928"
+    keyword_url = url + "/search?q=" + keyword + appendUrl
     browser.get(keyword_url)
 
-    scrollToEnd(browser, 1)  # auto-scroll page few times
-    showImageCount(browser, keyword, limit)
+    scrollToEnd(browser, 1)  # auto-scroll search page few times
 
     # find images to be scraped from page
-    imgList = browser.find_elements(By.XPATH, '//a[contains(@class,"image-list-link")]')
-    pageUrls = [url.get_attribute("href") for url in imgList]  # get all page URLs
+    imgList = browser.find_elements(By.XPATH, '//img[contains(@class,"Q4LuWd")]')
 
-    # loop through image thumbnails and load image page
+    # loop through image thumbnails
     for i in range(int(limit)):
-        pageUrl = pageUrls[i]
-        logging.info("Page URL(#%s): %s" % (i + 1, pageUrl))
+        thumbnail = imgList[i]
         try:
-            browser.get(pageUrl)
+            thumbnail.click()  # load image sidebar
             time.sleep(2)
-            # get image URL(s)
-            images = browser.find_elements(
-                By.XPATH, '//img[contains(@class,"image-placeholder")]'
-            )
-            if len(images) > 0:
-                for image in images:
-                    imgUrl = image.get_attribute("src")
-                    # logging.info("Image URL: " + imgUrl)
-                    downloadImage(imgUrl, folderName, logging)
-            else:
-                logging.warning("There is no image in this page.")
+            # get image URL
+            images = browser.find_elements(By.XPATH, '//img[contains(@class,"n3VNCb")]')
+            for image in images:
+                image_src = image.get_attribute("src")
+                # get *correct* link (with 'https' and without 'gstatic.com')
+                if "https" in image_src and "gstatic.com" not in image_src:
+                    imgUrl = image_src
+            logging.info("Image Source '%s' ==>", imgUrl.split("/")[2])
+            downloadImage(imgUrl, folderName, logging)
         except Exception as err:
             logging.error(str(err))
             continue  # skip to beginning of loop
@@ -103,13 +87,13 @@ def main():
         keyword = sys.argv[1]
         limit = sys.argv[2]
     else:
-        sys.exit("USAGE: python downloadImgur.py <category> <limit>")
+        sys.exit("USAGE: python googleSearch.py <keyword> <limit>")
 
-    url = "https://imgur.com"
-    folderName = "imgur"  # create ./imgur folder to store images
+    url = "https://www.google.com"
+    folderName = "google"  # create ./google folder to store images
     os.makedirs(folderName, exist_ok=True)
-    browser = startBrowser("firefox", headless=True)  # Brave/Chrome buggy
-    searchImgur(keyword, limit, url, folderName, browser)
+    browser = startBrowser("firefox", headless=True)  # Brave is buggy
+    searchGoogle(keyword, limit, url, folderName, browser)
     browser.quit()
 
 
