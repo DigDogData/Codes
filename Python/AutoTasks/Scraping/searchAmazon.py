@@ -8,6 +8,8 @@ import time
 import logging
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
+from selenium.webdriver.support import expected_conditions as EC
+from selenium.webdriver.support.ui import WebDriverWait
 from util import startBrowser
 from loginData import amazonLogin
 
@@ -55,8 +57,13 @@ def signinToAmazon(url, browser, action):
         signinButton2 = browser.find_element(By.XPATH, '//input[@id="signInSubmit"]')
         signinButton2.click()
 
-        # click 'Enter OTP' button
-        time.sleep(20)  # pause long enough to enter OTP from phone
+        # enter OTP code
+        otpBox = browser.find_element(By.XPATH, '//input[@id="auth-mfa-otpcode"]')
+        otpString = input("Enter OTP from phone: ")
+        otpBox.send_keys(otpString)
+        time.sleep(2)
+
+        # click OTP button
         otpButton = browser.find_element(By.XPATH, '//input[@id="auth-signin-button"]')
         otpButton.click()
         logging.info("Signed in successfully.")
@@ -81,12 +88,28 @@ def searchAmazon(keyphrase, browser):
             By.XPATH, '//input[@id="nav-search-submit-button"]'
         )
         searchButton.click()
+
+        # manually click sidebar filter(s)
+        wait = WebDriverWait(browser, 10)
+        wait.until(
+            EC.element_to_be_clickable((By.XPATH, '//span[text()="Purina Friskies"]'))
+        )
+        alert = browser.switch_to.alert
+        alert.accept()
+        print("alert accepted")
+
         logging.info("Search executed successfully.")
         time.sleep(2)
 
     except Exception as err:
         logging.error(str(err))
         sys.exit(1)
+
+
+# function to gather data
+def collectData(browser):
+    names = []
+    prices = []
 
 
 def main():
@@ -110,6 +133,7 @@ def main():
     action = ActionChains(browser)
     signinToAmazon(url, browser, action)
     searchAmazon(keyphrase, browser)
+    collectData(browser)
     # browser.quit()
 
 
