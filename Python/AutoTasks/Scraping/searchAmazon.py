@@ -1,48 +1,100 @@
 #!/usr/bin/env python3
 
-# searchAmazon.py - Search Amazon prices for 'wet cat food' =>
-# open Amazon, log into site, search for 'wet cat food', choose 'Purina Friskies'
-# as brand name and 'under $25' for price, then copy-paste the long link
+# searchAmazon.py - Search Amazon prices by keyphrase
+# (uses ActionChains to perfom mouse hover action)
 
 import sys
 import time
-import os
-import requests
 import logging
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
 from util import startBrowser
+from loginData import amazonLogin
 
 
-# function to auto-scroll 'num' times to expose more of page
-def scrollToEnd(browser, num):
-    for __ in range(num):
-        browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(5)  # pause between interactions
+# funtion to sign into Amazon
+def signinToAmazon(url, browser, action):
 
-
-# function to download and save image (uses requests)
-def downloadImage(image_url, folderName, logging):
     try:
-        image_res = requests.get(image_url, timeout=10)
-        try:
-            image_res.raise_for_status()
-            image_name = os.path.basename(image_url)
-            imageFile = open(os.path.join(folderName, image_name), "wb")
-            for chunk in image_res.iter_content(100000):
-                imageFile.write(chunk)
-            imageFile.close()
-            logging.info("Image '%s' saved.", image_name)
-        except Exception as err:  # if there is connection error
-            logging.error("Connection Error: " + str(err))
-            pass
-    except Exception as err:  # if there is other error (e.g. timeout)
-        logging.error("Image Download Error: " + str(err))
-        pass
+        # load amazon.com
+        logging.info("Signing into Amazon...")
+        browser.get(url)
+        time.sleep(2)
+
+        # hover over 'Sign in' box
+        signinHover = browser.find_element(
+            By.XPATH, '//span[@id="nav-link-accountList-nav-line-1"]'
+        )
+        action.move_to_element(signinHover).perform()
+        time.sleep(1)
+
+        # click 'Sign in' button #1
+        signinButton1 = browser.find_element(
+            By.XPATH,
+            '//div[@id="nav-flyout-ya-signin"]//span[@class="nav-action-inner"]',
+        )
+        signinButton1.click()
+        time.sleep(2)
+
+        # enter sign-in information
+        signinElem = browser.find_element(By.XPATH, '//input[@id="ap_email"]')
+        signinElem.send_keys(amazonLogin("username"))
+        time.sleep(2)
+
+        # continue
+        continueElem = browser.find_element(By.XPATH, '//input[@id="continue"]')
+        continueElem.click()
+        time.sleep(2)
+
+        # enter password information
+        passwordElem = browser.find_element(By.XPATH, '//input[@id="ap_password"]')
+        passwordElem.send_keys(amazonLogin("password"))
+        time.sleep(2)
+
+        # click 'Sign in' button #2
+        signinButton2 = browser.find_element(By.XPATH, '//input[@id="signInSubmit"]')
+        signinButton2.click()
+
+        # click 'Enter OTP' button
+        time.sleep(20)  # pause long enough to enter OTP from phone
+        otpButton = browser.find_element(By.XPATH, '//input[@id="auth-signin-button"]')
+        otpButton.click()
+        logging.info("Signed in successfully.")
+        time.sleep(2)
+
+    except Exception as err:
+        logging.error(str(err))
+        sys.exit(1)
 
 
-# funtion to search google
-def searchAmazon(keyword, limit, url, folderName, browser, action):
+# function to search Amazon
+def searchAmazon(keyphrase, browser):
+
+    try:
+        # search for keyphrase
+        searchBox = browser.find_element(By.XPATH, '//input[@id="twotabsearchtextbox"]')
+        searchBox.send_keys(keyphrase)
+        time.sleep(2)
+
+        # click search button
+        searchButton = browser.find_element(
+            By.XPATH, '//input[@id="nav-search-submit-button"]'
+        )
+        searchButton.click()
+        logging.info("Search executed successfully.")
+        time.sleep(2)
+
+    except Exception as err:
+        logging.error(str(err))
+        sys.exit(1)
+
+
+def main():
+    # get keyphrase from CLI
+    if len(sys.argv) == 2:
+        keyphrase = sys.argv[1]
+    else:
+        sys.exit("USAGE: python searchAmazon.py <keyphrase>")
 
     # set logging config
     logging.basicConfig(
@@ -53,51 +105,12 @@ def searchAmazon(keyword, limit, url, folderName, browser, action):
     )
     # logging.disable(logging.CRITICAL)  # uncomment to disable logging
 
-    # open keyword page in browser
-    appendUrl = "&source=lnms&tbm=isch&sa=X&ved=2ahUKEwi8-rSt-onzAhUGXM0KHbA6A3wQ_AUoAXoECAIQAw&biw=1794&bih=928"
-    keyword_url = url + "/search?q=" + keyword + appendUrl
-    browser.get(keyword_url)
-
-    scrollToEnd(browser, 1)  # auto-scroll search page few times
-
-    # find images to be scraped from page
-    imgList = browser.find_elements(By.XPATH, '//img[contains(@class,"Q4LuWd")]')
-
-    # loop through image thumbnails
-    for i in range(int(limit)):
-        thumbnail = imgList[i]
-        try:
-            thumbnail.click()  # load image sidebar
-            time.sleep(2)
-            # get image URL
-            images = browser.find_elements(By.XPATH, '//img[contains(@class,"n3VNCb")]')
-            for image in images:
-                image_src = image.get_attribute("src")
-                # get *correct* link (with 'https' and without 'gstatic.com')
-                if "https" in image_src and "gstatic.com" not in image_src:
-                    imgUrl = image_src
-            logging.info("Image Source '%s' ==>", imgUrl.split("/")[2])
-            downloadImage(imgUrl, folderName, logging)
-        except Exception as err:
-            logging.error(str(err))
-            continue  # skip to beginning of loop
-
-
-def main():
-    # get keyword from CLI
-    if len(sys.argv) == 3:
-        keyword = sys.argv[1]
-        limit = sys.argv[2]
-    else:
-        sys.exit("USAGE: python googleSearch.py <keyword> <limit>")
-
-    url = "https://www.google.com"
-    folderName = "google"  # create ./google folder to store images
-    os.makedirs(folderName, exist_ok=True)
-    browser = startBrowser("firefox", headless=True)  # Brave is buggy
+    url = "https://www.amazon.com"
+    browser = startBrowser("brave", headless=False)  # Brave is buggy
     action = ActionChains(browser)
-    searchAmazon(keyword, limit, url, folderName, browser, action)
-    browser.quit()
+    signinToAmazon(url, browser, action)
+    searchAmazon(keyphrase, browser)
+    # browser.quit()
 
 
 if __name__ == "__main__":

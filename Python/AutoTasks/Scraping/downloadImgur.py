@@ -32,7 +32,7 @@ def showImageCount(browser, keyword, limit):
 
 
 # function to download and save image (uses requests)
-def downloadImage(image_url, folderName, logging):
+def downloadImage(image_url, folderName):
     try:
         image_res = requests.get(image_url, timeout=10)
         try:
@@ -54,15 +54,6 @@ def downloadImage(image_url, folderName, logging):
 # function to search Imgur
 def searchImgur(keyword, limit, url, folderName, browser):
 
-    # set logging config
-    logging.basicConfig(
-        # level=logging.DEBUG,  # lowest logging level (includes DEBUG messages)
-        level=logging.INFO,  # next lowest level (excludes DEBUG messages)
-        format="%(asctime)s - %(levelname)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
-    # logging.disable(logging.CRITICAL)  # uncomment to disable logging
-
     # open keyword page in browser
     keyword_url = url + "/search?q=" + keyword
     browser.get(keyword_url)
@@ -77,7 +68,7 @@ def searchImgur(keyword, limit, url, folderName, browser):
     # loop through image thumbnails and load image page
     for i in range(int(limit)):
         pageUrl = pageUrls[i]
-        logging.info("Page URL(#%s): %s" % (i + 1, pageUrl))
+        logging.info("Source URL(#%s): %s" % (i + 1, pageUrl))
         try:
             browser.get(pageUrl)
             time.sleep(2)
@@ -89,7 +80,7 @@ def searchImgur(keyword, limit, url, folderName, browser):
                 for image in images:
                     imgUrl = image.get_attribute("src")
                     # logging.info("Image URL: " + imgUrl)
-                    downloadImage(imgUrl, folderName, logging)
+                    downloadImage(imgUrl, folderName)
             else:
                 logging.warning("There is no image in this page.")
         except Exception as err:
@@ -104,6 +95,15 @@ def main():
         limit = sys.argv[2]
     else:
         sys.exit("USAGE: python downloadImgur.py <category> <limit>")
+
+    # set logging config
+    logging.basicConfig(
+        # level=logging.DEBUG,  # lowest logging level (includes DEBUG messages)
+        level=logging.INFO,  # next lowest level (excludes DEBUG messages)
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+    # logging.disable(logging.CRITICAL)  # uncomment to disable logging
 
     url = "https://imgur.com"
     folderName = "imgur"  # create ./imgur folder to store images

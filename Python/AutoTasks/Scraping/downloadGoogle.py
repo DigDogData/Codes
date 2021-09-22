@@ -20,7 +20,7 @@ def scrollToEnd(browser, num):
 
 
 # function to download and save image (uses requests)
-def downloadImage(image_url, folderName, logging):
+def downloadImage(image_url, folderName):
     try:
         image_res = requests.get(image_url, timeout=10)
         try:
@@ -41,15 +41,6 @@ def downloadImage(image_url, folderName, logging):
 
 # funtion to search google
 def searchGoogle(keyword, limit, url, folderName, browser):
-
-    # set logging config
-    logging.basicConfig(
-        # level=logging.DEBUG,  # lowest logging level (includes DEBUG messages)
-        level=logging.INFO,  # next lowest level (excludes DEBUG messages)
-        format="%(asctime)s - %(levelname)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
-    # logging.disable(logging.CRITICAL)  # uncomment to disable logging
 
     # open keyword page in browser
     appendUrl = "&source=lnms&tbm=isch&sa=X&ved=2ahUKEwi8-rSt-onzAhUGXM0KHbA6A3wQ_AUoAXoECAIQAw&biw=1794&bih=928"
@@ -74,8 +65,8 @@ def searchGoogle(keyword, limit, url, folderName, browser):
                 # get *correct* link (with 'https' and without 'gstatic.com')
                 if "https" in image_src and "gstatic.com" not in image_src:
                     imgUrl = image_src
-            logging.info("Image Source '%s' ==>", imgUrl.split("/")[2])
-            downloadImage(imgUrl, folderName, logging)
+            logging.info("Source: %s ==>", imgUrl.split("/")[2])
+            downloadImage(imgUrl, folderName)
         except Exception as err:
             logging.error(str(err))
             continue  # skip to beginning of loop
@@ -88,6 +79,15 @@ def main():
         limit = sys.argv[2]
     else:
         sys.exit("USAGE: python googleSearch.py <keyword> <limit>")
+
+    # set logging config
+    logging.basicConfig(
+        # level=logging.DEBUG,  # lowest logging level (includes DEBUG messages)
+        level=logging.INFO,  # next lowest level (excludes DEBUG messages)
+        format="%(asctime)s - %(levelname)s - %(message)s",
+        datefmt="%Y-%m-%d %H:%M:%S",
+    )
+    # logging.disable(logging.CRITICAL)  # uncomment to disable logging
 
     url = "https://www.google.com"
     folderName = "google"  # create ./google folder to store images
