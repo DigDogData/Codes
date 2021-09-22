@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 
-# searchAmazon.py - Search Amazon prices by keyphrase
+# amazonSignin.py - Sign into amazon.com
 # (uses ActionChains to perfom mouse hover action)
 
 import sys
@@ -8,22 +8,20 @@ import time
 import logging
 from selenium.webdriver.common.by import By
 from selenium.webdriver.common.action_chains import ActionChains
-from selenium.webdriver.support import expected_conditions as EC
-from selenium.webdriver.support.ui import WebDriverWait
 from util import startBrowser
 from loginData import amazonLogin
 
 
 # funtion to sign into Amazon
-def signinToAmazon(url, browser, action):
+def signinToAmazon(browser, url, action):
 
     try:
         # load amazon.com
-        logging.info("Signing into Amazon...")
         browser.get(url)
         time.sleep(2)
 
         # hover over 'Sign in' box
+        logging.info("Signing into Amazon...")
         signinHover = browser.find_element(
             By.XPATH, '//span[@id="nav-link-accountList-nav-line-1"]'
         )
@@ -74,51 +72,7 @@ def signinToAmazon(url, browser, action):
         sys.exit(1)
 
 
-# function to search Amazon
-def searchAmazon(keyphrase, browser):
-
-    try:
-        # search for keyphrase
-        searchBox = browser.find_element(By.XPATH, '//input[@id="twotabsearchtextbox"]')
-        searchBox.send_keys(keyphrase)
-        time.sleep(2)
-
-        # click search button
-        searchButton = browser.find_element(
-            By.XPATH, '//input[@id="nav-search-submit-button"]'
-        )
-        searchButton.click()
-
-        # manually click sidebar filter(s)
-        wait = WebDriverWait(browser, 10)
-        wait.until(
-            EC.element_to_be_clickable((By.XPATH, '//span[text()="Purina Friskies"]'))
-        )
-        alert = browser.switch_to.alert
-        alert.accept()
-        print("alert accepted")
-
-        logging.info("Search executed successfully.")
-        time.sleep(2)
-
-    except Exception as err:
-        logging.error(str(err))
-        sys.exit(1)
-
-
-# function to gather data
-def collectData(browser):
-    names = []
-    prices = []
-
-
 def main():
-    # get keyphrase from CLI
-    if len(sys.argv) == 2:
-        keyphrase = sys.argv[1]
-    else:
-        sys.exit("USAGE: python searchAmazon.py <keyphrase>")
-
     # set logging config
     logging.basicConfig(
         # level=logging.DEBUG,  # lowest logging level (includes DEBUG messages)
@@ -131,9 +85,7 @@ def main():
     url = "https://www.amazon.com"
     browser = startBrowser("brave", headless=False)  # Brave is buggy
     action = ActionChains(browser)
-    signinToAmazon(url, browser, action)
-    searchAmazon(keyphrase, browser)
-    collectData(browser)
+    signinToAmazon(browser, url, action)
     # browser.quit()
 
 
