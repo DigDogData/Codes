@@ -1,6 +1,7 @@
 .RData
 .Rhistory
 *.log
+*.csv
 *.mkv
 *.webm
 Pipfile*

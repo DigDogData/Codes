@@ -5,11 +5,26 @@
 
 import sys
 import time
+import re
 import logging
+import pandas as pd
+from math import nan
 from selenium.webdriver.common.by import By
 from util import startBrowser
 
 
+# class to save search data to file
+class SaveData:
+    def __init__(self, filename, product_list):
+        self.filename = filename
+        self.product_list = product_list
+        logging.info("Saving data...")
+        df = pd.DataFrame(self.product_list)
+        df.to_csv(self.filename)
+        logging.info("Done.")
+
+
+# main class to run Amazon search
 class AmazonAPI:
 
     # initializer
@@ -21,12 +36,22 @@ class AmazonAPI:
         self.min_price = filters["min_price"]
         self.max_price = filters["max_price"]
 
-    # function to run AmazonAPI
+    # function to run methods defined below
     def run(self):
         self.search_amazon()
-        links = self.get_product_links()
-        self.get_product_info(links)
-        return None
+        page_links = self.get_product_links()
+        product_list = self.get_product_info(page_links)
+        return product_list
+
+    # function to convert price string to float
+    def convert_price(self, price):
+        price = re.compile(r"\d+\.\d{2}").search(price)[0]
+        return float(price)
+
+    # function to convert rate string to float
+    def convert_rate(self, rate):
+        rate = re.compile(r"\d+\.\d{2}").search(rate)[0]
+        return float(rate)
 
     # function to search Amazon
     def search_amazon(self):
@@ -42,6 +67,7 @@ class AmazonAPI:
 
             # load amazon.com
             self.browser.get(self.base_url)
+            self.browser.set_page_load_timeout(30)
             time.sleep(2)
 
             # enter searchTerm in search box
@@ -100,12 +126,12 @@ class AmazonAPI:
 
                 # get links from current page
                 item_elems = self.browser.find_elements(
-                    By.XPATH, '//a[contains(@class,"s-no-outline")]'
+                    By.XPATH,
+                    '//span[@class="rush-component"]//a[contains(@class,"s-no-outline")]',
                 )
                 for i in range(len(item_elems)):
                     page_urls.append(item_elems[i].get_attribute("href"))
-                logging.info("Page #%s scanned", k)
-                time.sleep(2)
+                logging.info("Search result page #%s scanned", k)
 
                 # click 'Next' button to go to next page
                 try:
@@ -119,7 +145,7 @@ class AmazonAPI:
                     last_page = True  # reached last page
                     pass
 
-            logging.info("Total %s items found in %s pages.", len(page_urls), k)
+            logging.info("(Total %s items found in %s pages.)", len(page_urls), k)
 
         except Exception as err:
             logging.error(str(err))
@@ -131,31 +157,57 @@ class AmazonAPI:
     def get_product_info(self, page_urls):
 
         # loop through page url list and go to each product page
-        # for i in range(len(page_urls)):
-        for i in range(1):
+        product_list = []
+        for i in range(len(page_urls)):
             page_url = page_urls[i]
-            logging.info("Scanning producet page #%s", i + 1)
             try:
                 self.browser.get(page_url)
+                self.browser.set_page_load_timeout(30)
                 time.sleep(2)
 
-                # get product name, vendor name, price
+                # get product name
                 product_name = self.browser.find_element(
                     By.XPATH, '//span[@id="productTitle"]'
-                )
-                vendor_name = self.browser.find_element(
-                    By.XPATH, '//a[@id="bylineInfo"]'
-                )
-                price = self.browser.find_element(
-                    By.XPATH, '//span[@id="priceblock_ourprice"]'
-                )
-                time.sleep(2)
+                ).text
+
+                # get price
+                try:
+                    price_str = self.browser.find_element(
+                        By.XPATH, '//span[@id="priceblock_ourprice"]'
+                    ).text
+                    price = self.convert_price(price_str)  # convert string to float
+                except Exception:
+                    price = nan  # price info not available
+                    pass
+
+                # get price/lb
+                try:
+                    rate_str = self.browser.find_element(
+                        By.XPATH,
+                        '//td[@class="a-span12"]//span[@class="a-size-small a-color-price"]',
+                    ).text
+                    rate = self.convert_rate(rate_str)  # convert string to float
+                except Exception:
+                    rate = nan  # price/lb info not available
+                    pass
+
+                # collect product info
+                product_info = {
+                    "name": product_name,
+                    "price": price,
+                    "price_per_lb": rate,
+                }
+                product_list.append(product_info)
+                logging.info("Product page #%s scanned", i + 1)
 
             except Exception as err:
                 logging.error(str(err))
                 continue
 
+        return product_list
 
+
+# run main code
 if __name__ == "__main__":
 
     # set logging config
@@ -178,9 +230,12 @@ if __name__ == "__main__":
         "min_price": min_price,
         "max_price": max_price,
     }
-    browser = startBrowser("brave", headless=False)
+    browser = startBrowser("firefox", headless=True)
+    fp = open("amazon.csv", "w")
 
     # execute code
     amaz = AmazonAPI(browser, base_url, search_term, filters)
-    amaz.run()
-    # browser.quit()
+    data = amaz.run()
+    SaveData(fp, data)
+    browser.quit()
+    fp.close()
