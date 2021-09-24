@@ -95,6 +95,9 @@ class ImgurAPI:
             search_button.click()
             time.sleep(2)
 
+            # show image count
+            self.show_image_count()
+
             # auto-scroll search page few times
             self.scroll_to_end()
 
