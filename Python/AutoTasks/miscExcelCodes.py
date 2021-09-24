@@ -3,14 +3,19 @@
 # miscExcelCodes.py - Example codes to interact with Excel
 
 import openpyxl
+from openpyxl.utils import get_column_letter
+from openpyxl.utils import column_index_from_string
 
 wb = openpyxl.load_workbook("example.xlsx")
 print(wb.sheetnames)
+
 sheet = wb.active  # active sheet
 print(sheet)
 print(sheet["A1"].value)
+
 anotherSheet = wb["Sheet3"]
 print(anotherSheet)
+
 c = sheet["B1"]  # get a cell from the sheet
 print(c.value)
 print("Row %s, Column %s is %s" % (c.row, c.column, c.value))
@@ -22,3 +27,26 @@ for i in range(1, 8, 2):  # go through every other row
     print(i, sheet.cell(row=i, column=2).value)
 
 print("(", sheet.max_row, ",", sheet.max_column, ")")  # get size of the sheet
+
+# convert column index to letter
+print(get_column_letter(1))
+print(get_column_letter(2))
+print(get_column_letter(27))
+print(get_column_letter(900))
+print(get_column_letter(sheet.max_column))
+
+# convert column letter to index
+print(column_index_from_string("A"))
+print(column_index_from_string("ABC"))
+
+# get values of all cells between rows and columns
+print(tuple(sheet["A1":"C3"]))  # get all cells from A1 to C3
+
+for rowOfCellObjects in sheet["A1":"C3"]:
+    for cellObj in rowOfCellObjects:
+        print(cellObj.coordinate, cellObj.value)
+    print("--- END OF ROW ---")
+
+# get values of cells in a particular column (or row)
+for cellObj in list(sheet.columns)[1]:
+    print(cellObj.value)
