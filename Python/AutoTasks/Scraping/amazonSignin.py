@@ -12,67 +12,95 @@ from util import startBrowser
 from loginData import amazonLogin
 
 
-# funtion to sign into Amazon
-def signinToAmazon(browser, url, action):
+# main class to run Amazon signing in script
+class AmazonAPI:
 
-    try:
-        # load amazon.com
-        browser.get(url)
+    # initializer
+    def __init__(self, browser, base_url, action):
+        self.browser = browser
+        self.base_url = base_url
+        self.action = action
+
+    # function to enter OTP
+    def enter_otp(self):
+        otp_box = self.browser.find_element(By.XPATH, '//input[@id="auth-mfa-otpcode"]')
+        otp_string = input("Enter OTP from phone: ")
+        otp_box.send_keys(otp_string)
         time.sleep(2)
+        return None
 
-        # hover over 'Sign in' box
-        logging.info("Signing into Amazon...")
-        signinHover = browser.find_element(
-            By.XPATH, '//span[@id="nav-link-accountList-nav-line-1"]'
-        )
-        action.move_to_element(signinHover).perform()
-        time.sleep(1)
+    # funtion to sign in to Amazon
+    def sign_in(self):
 
-        # click 'Sign in' button #1
-        signinButton1 = browser.find_element(
-            By.XPATH,
-            '//div[@id="nav-flyout-ya-signin"]//span[@class="nav-action-inner"]',
-        )
-        signinButton1.click()
-        time.sleep(2)
+        try:
 
-        # enter sign-in information
-        signinElem = browser.find_element(By.XPATH, '//input[@id="ap_email"]')
-        signinElem.send_keys(amazonLogin("username"))
-        time.sleep(2)
+            # load amazon.com
+            self.browser.get(self.base_url)
+            self.browser.set_page_load_timeout(30)
+            time.sleep(2)
 
-        # continue
-        continueElem = browser.find_element(By.XPATH, '//input[@id="continue"]')
-        continueElem.click()
-        time.sleep(2)
+            # hover over 'Sign in' box
+            logging.info("Signing into Amazon...")
+            signin_hover = self.browser.find_element(
+                By.XPATH, '//span[@id="nav-link-accountList-nav-line-1"]'
+            )
+            self.action.move_to_element(signin_hover).perform()
+            time.sleep(1)
 
-        # enter password information
-        passwordElem = browser.find_element(By.XPATH, '//input[@id="ap_password"]')
-        passwordElem.send_keys(amazonLogin("password"))
-        time.sleep(2)
+            # click 'Sign in' button #1
+            signin_button1 = self.browser.find_element(
+                By.XPATH,
+                '//div[@id="nav-flyout-ya-signin"]//span[@class="nav-action-inner"]',
+            )
+            signin_button1.click()
+            time.sleep(2)
 
-        # click 'Sign in' button #2
-        signinButton2 = browser.find_element(By.XPATH, '//input[@id="signInSubmit"]')
-        signinButton2.click()
+            # enter sign-in information
+            signin_elem = self.browser.find_element(By.XPATH, '//input[@id="ap_email"]')
+            signin_elem.send_keys(amazonLogin("username"))
+            time.sleep(2)
 
-        # enter OTP code
-        otpBox = browser.find_element(By.XPATH, '//input[@id="auth-mfa-otpcode"]')
-        otpString = input("Enter OTP from phone: ")
-        otpBox.send_keys(otpString)
-        time.sleep(2)
+            # continue
+            continue_elem = self.browser.find_element(
+                By.XPATH, '//input[@id="continue"]'
+            )
+            continue_elem.click()
+            time.sleep(2)
 
-        # click OTP button
-        otpButton = browser.find_element(By.XPATH, '//input[@id="auth-signin-button"]')
-        otpButton.click()
-        logging.info("Signed in successfully.")
-        time.sleep(2)
+            # enter password information
+            password_elem = self.browser.find_element(
+                By.XPATH, '//input[@id="ap_password"]'
+            )
+            password_elem.send_keys(amazonLogin("password"))
+            time.sleep(2)
 
-    except Exception as err:
-        logging.error(str(err))
-        sys.exit(1)
+            # click 'Sign in' button #2
+            signin_button2 = self.browser.find_element(
+                By.XPATH, '//input[@id="signInSubmit"]'
+            )
+            signin_button2.click()
+
+            # enter OTP code
+            self.enter_otp()
+
+            # click OTP button
+            otp_button = self.browser.find_element(
+                By.XPATH, '//input[@id="auth-signin-button"]'
+            )
+            otp_button.click()
+            logging.info("Signed in successfully.")
+            time.sleep(2)
+
+        except Exception as err:
+            logging.error(str(err))
+            sys.exit(1)
+
+        return None
 
 
-def main():
+# run main function
+if __name__ == "__main__":
+
     # set logging config
     logging.basicConfig(
         # level=logging.DEBUG,  # lowest logging level (includes DEBUG messages)
@@ -82,12 +110,11 @@ def main():
     )
     # logging.disable(logging.CRITICAL)  # uncomment to disable logging
 
-    url = "https://www.amazon.com"
-    browser = startBrowser("brave", headless=False)  # Brave is buggy
+    # initialize variables
+    base_url = "https://www.amazon.com"
+    browser = startBrowser("brave", headless=False)
     action = ActionChains(browser)
-    signinToAmazon(browser, url, action)
+
+    # execute code
+    AmazonAPI(browser, base_url, action).sign_in()
     # browser.quit()
-
-
-if __name__ == "__main__":
-    main()

@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 
-# downloadGoogle.py - Download Google images by keyword
-# USAGE: py downloadGoogle.py <keyword> <limit>
+# googleDownload.py - Download Google images by keyword
+# USAGE: py googleDownload.py <search_term> <limit>
 
 import sys
 import time
@@ -12,73 +12,131 @@ from selenium.webdriver.common.by import By
 from util import startBrowser
 
 
-# function to auto-scroll 'num' times to expose more of page
-def scrollToEnd(browser, num):
-    for __ in range(num):
-        browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
-        time.sleep(5)  # pause between interactions
+# class to download images
+class GoogleAPI:
 
+    # initializer
+    def __init__(self, browser, base_url, search_term, limit, folder_name, scroll_num):
+        self.browser = browser
+        self.base_url = base_url
+        self.search_term = search_term
+        self.limit = limit
+        self.folder_name = folder_name
+        self.scroll_num = scroll_num
 
-# function to download and save image (uses requests)
-def downloadImage(image_url, folderName):
-    try:
-        image_res = requests.get(image_url, timeout=10)
+    # function to auto-scroll few times to expose more of page
+    def scroll_to_end(self):
+        for __ in range(self.scroll_num):
+            self.browser.execute_script(
+                "window.scrollTo(0, document.body.scrollHeight);"
+            )
+            time.sleep(5)
+        return None
+
+    # function to download and save image (uses requests)
+    def download_image(self, image_url):
+
         try:
-            image_res.raise_for_status()
-            image_name = os.path.basename(image_url)
-            imageFile = open(os.path.join(folderName, image_name), "wb")
-            for chunk in image_res.iter_content(100000):
-                imageFile.write(chunk)
-            imageFile.close()
-            logging.info("Image '%s' saved.", image_name)
-        except Exception as err:  # if there is connection error
-            logging.error("Connection Error: " + str(err))
+            image_res = requests.get(image_url, timeout=10)
+            try:
+                image_res.raise_for_status()
+                image_name = os.path.basename(image_url)
+                image_file = open(os.path.join(self.folder_name, image_name), "wb")
+                for chunk in image_res.iter_content(100000):
+                    image_file.write(chunk)
+                image_file.close()
+                logging.info("Image '%s' saved.", image_name)
+
+            except Exception as err:  # if there is connection error
+                logging.error("Connection Error: " + str(err))
+                pass
+
+        except Exception as err:  # if there is other error (e.g. timeout)
+            logging.error("Image Download Error: " + str(err))
             pass
-    except Exception as err:  # if there is other error (e.g. timeout)
-        logging.error("Image Download Error: " + str(err))
-        pass
 
+        return None
 
-# funtion to search google
-def searchGoogle(keyword, limit, url, folderName, browser):
+    # funtion to search google
+    def search_google(self):
 
-    # open keyword page in browser
-    appendUrl = "&source=lnms&tbm=isch&sa=X&ved=2ahUKEwi8-rSt-onzAhUGXM0KHbA6A3wQ_AUoAXoECAIQAw&biw=1794&bih=928"
-    keyword_url = url + "/search?q=" + keyword + appendUrl
-    browser.get(keyword_url)
-
-    scrollToEnd(browser, 1)  # auto-scroll search page few times
-
-    # find images to be scraped from page
-    imgList = browser.find_elements(By.XPATH, '//img[contains(@class,"Q4LuWd")]')
-
-    # loop through image thumbnails
-    for i in range(int(limit)):
-        thumbnail = imgList[i]
         try:
-            thumbnail.click()  # load image sidebar
+            logging.info("Searching '%s'...", self.search_term)
+
+            # load google.com
+            self.browser.get(self.base_url)
+            self.browser.set_page_load_timeout(30)
             time.sleep(2)
-            # get image URL
-            images = browser.find_elements(By.XPATH, '//img[contains(@class,"n3VNCb")]')
-            for image in images:
-                image_src = image.get_attribute("src")
-                # get *correct* link (with 'https' and without 'gstatic.com')
-                if "https" in image_src and "gstatic.com" not in image_src:
-                    imgUrl = image_src
-            logging.info("Source: %s ==>", imgUrl.split("/")[2])
-            downloadImage(imgUrl, folderName)
+
+            # click 'Images' button (at top right)
+            images_button = self.browser.find_element(
+                By.XPATH, '//a[contains(text(),"Images")]'
+            )
+            images_button.click()
+            time.sleep(2)
+
+            # enter search_term in search box
+            search_box = self.browser.find_element(
+                By.XPATH, '//input[contains(@class,"gsfi")]'
+            )
+            search_box.send_keys(self.search_term)
+            time.sleep(2)
+
+            # click search button
+            search_button = self.browser.find_element(
+                By.XPATH,
+                '//div[@class="zgAlFc"]//span[contains(@class,"MZy1Rb")]',
+            )
+            search_button.click()
+            time.sleep(2)
+
+            # auto-scroll search page few times
+            self.scroll_to_end()
+
+            # find list of images to be scraped from page
+            img_list = self.browser.find_elements(
+                By.XPATH, '//img[contains(@class,"Q4LuWd")]'
+            )
+
+            # loop through image thumbnails
+            for i in range(int(self.limit)):
+                thumbnail = img_list[i]
+                try:
+                    thumbnail.click()  # load image sidebar
+                    time.sleep(2)
+
+                    # get image URL
+                    images = self.browser.find_elements(
+                        By.XPATH, '//img[contains(@class,"n3VNCb")]'
+                    )
+                    for image in images:
+                        image_src = image.get_attribute("src")
+                        # get *correct* link (with 'https' and without 'gstatic.com')
+                        if "https" in image_src and "gstatic.com" not in image_src:
+                            img_url = image_src
+                    logging.info("Source #%s: %s ==>", i + 1, img_url.split("/")[2])
+                    self.download_image(img_url)
+
+                except Exception as err:
+                    logging.error(str(err))
+                    continue  # skip to beginning of loop
+
         except Exception as err:
             logging.error(str(err))
-            continue  # skip to beginning of loop
+            sys.exit(1)
+
+        return None
 
 
-def main():
+# run main function
+if __name__ == "__main__":
+
     # get keyword from CLI
     if len(sys.argv) == 3:
-        keyword = sys.argv[1]
+        search_term = sys.argv[1]
         limit = sys.argv[2]
     else:
-        sys.exit("USAGE: python googleSearch.py <keyword> <limit>")
+        sys.exit("USAGE: python googleSearch.py <search_term> <limit>")
 
     # set logging config
     logging.basicConfig(
@@ -89,13 +147,15 @@ def main():
     )
     # logging.disable(logging.CRITICAL)  # uncomment to disable logging
 
-    url = "https://www.google.com"
-    folderName = "google"  # create ./google folder to store images
-    os.makedirs(folderName, exist_ok=True)
-    browser = startBrowser("firefox", headless=True)  # Brave is buggy
-    searchGoogle(keyword, limit, url, folderName, browser)
+    # initialize variables
+    base_url = "https://www.google.com"
+    folder_name = "google"  # create ./google folder to store images
+    os.makedirs(folder_name, exist_ok=True)
+    browser = startBrowser("firefox", headless=True)
+    scroll_num = 2
+
+    # execute code
+    GoogleAPI(
+        browser, base_url, search_term, limit, folder_name, scroll_num
+    ).search_google()
     browser.quit()
-
-
-if __name__ == "__main__":
-    main()

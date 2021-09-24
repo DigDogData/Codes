@@ -70,7 +70,7 @@ class AmazonAPI:
             self.browser.set_page_load_timeout(30)
             time.sleep(2)
 
-            # enter searchTerm in search box
+            # enter search_term in search box
             search_box = self.browser.find_element(
                 By.XPATH, '//input[@id="twotabsearchtextbox"]'
             )
@@ -230,12 +230,11 @@ if __name__ == "__main__":
         "min_price": min_price,
         "max_price": max_price,
     }
-    browser = startBrowser("firefox", headless=True)
+    browser = startBrowser("chrome", headless=True)
     fp = open("amazon.csv", "w")
 
     # execute code
-    amaz = AmazonAPI(browser, base_url, search_term, filters)
-    data = amaz.run()
+    data = AmazonAPI(browser, base_url, search_term, filters).run()
     SaveData(fp, data)
     browser.quit()
     fp.close()
