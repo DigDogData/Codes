@@ -3,6 +3,7 @@
 *.log
 *.csv
 *.mkv
+*.xlsx
 *.webm
 Pipfile*
 PyData/
