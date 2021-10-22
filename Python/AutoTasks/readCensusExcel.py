@@ -4,7 +4,7 @@
 
 import openpyxl
 import pprint
-import census2010       # import only after creating it below
+import census2010  # import only after creating it below
 
 
 class ReadCensusData:
@@ -14,7 +14,7 @@ class ReadCensusData:
         self.file_name = file_name
         self.sheet = sheet
 
-    # method to read census data
+    # method to save census data
     def save_census(self):
 
         # collect each county's population and tracts
@@ -22,9 +22,9 @@ class ReadCensusData:
         print("Reading rows...")
         for row in range(2, self.sheet.max_row + 1):
             # each row has data for one census tract
-            state = self.sheet["B" + str(row)].value
-            county = self.sheet["C" + str(row)].value
-            pop = self.sheet["D" + str(row)].value
+            state = self.sheet["B" + str(row)].value  # 'state' cell data
+            county = self.sheet["C" + str(row)].value  # 'county' cell data
+            pop = self.sheet["D" + str(row)].value  # 'pop' cell data
 
             # make sure keys for state and county exist before writing values to them
             # (setdefault() method sets value to a key if none exists, passes otherwise)
@@ -47,13 +47,16 @@ class ReadCensusData:
     # method to show census data
     def show_census(self, state, county):
         county_pop = census2010.allData[state][county]["pop"]
-        print("The 2010 population of {%s} was {%s}", county, str(county_pop))
+        # print("The 2010 population of {%s} was {%s}", county, str(county_pop))
+        print("The 2010 population of %s was %s" % (county, str(county_pop)))
+        return None
 
 
 if __name__ == "__main__":
     print("Opening workbook...")
-    wb = openpyxl.load_workbook("censuspopdata.xlsx")
-    file_name = "census2010.py"
+    wb = openpyxl.load_workbook("Data/censuspopdata.xlsx")
     sheet = wb["Population by Census Tract"]  # read sheet by name
+    file_name = "census2010.py"  # file to save/show processed census data
     ReadCensusData(file_name, sheet).save_census()
-    ReadCensusData(file_name, sheet).show_census("AK", "Anchorage")
+    # ReadCensusData(file_name, sheet).show_census("AK", "Anchorage")
+    ReadCensusData(file_name, sheet).show_census("AL", "Baldwin")

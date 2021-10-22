@@ -6,7 +6,7 @@ import openpyxl
 from openpyxl.utils import get_column_letter
 from openpyxl.utils import column_index_from_string
 
-wb = openpyxl.load_workbook("example.xlsx")
+wb = openpyxl.load_workbook("Data/example.xlsx")
 print(wb.sheetnames)
 
 sheet = wb.active  # active sheet
@@ -50,3 +50,12 @@ for rowOfCellObjects in sheet["A1":"C3"]:
 # get values of cells in a particular column (or row)
 for cellObj in list(sheet.columns)[1]:
     print(cellObj.value)
+print("---------------------------------")
+
+# create and save excel documents
+wb = openpyxl.Workbook()  # create a blank workbook
+print(wb.sheetnames)  # starts with one sheet
+sheet = wb.active
+print(sheet.title)
+sheet.title = "Spam Bacon Eggs Sheet"  # change sheet name/title
+print(wb.sheetnames)

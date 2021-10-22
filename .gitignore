@@ -3,9 +3,9 @@
 *.log
 *.csv
 *.mkv
-*.xlsx
 *.webm
 Pipfile*
+Data/
 PyData/
 test/
 QuizFiles/
