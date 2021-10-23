@@ -46,3 +46,10 @@ print(final.isnull().any())
 # select total pop data for year 2010
 data2010 = final.query("year == 2010 & ages == 'total'")
 print(data2010.head())
+
+# compute and display population density
+data2010.set_index("state", inplace=True)
+density = data2010["population"] / data2010["area (sq. mi)"]
+density.sort_values(ascending=False, inplace=True)
+print(density.head())
+print(density.tail())
