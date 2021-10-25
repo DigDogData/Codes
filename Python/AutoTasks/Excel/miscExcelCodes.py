@@ -5,8 +5,9 @@
 import openpyxl
 from openpyxl.utils import get_column_letter
 from openpyxl.utils import column_index_from_string
+from openpyxl.styles import Font
 
-wb = openpyxl.load_workbook("Data/example.xlsx")
+wb = openpyxl.load_workbook("../Data/example.xlsx")
 print(wb.sheetnames)
 
 sheet = wb.active  # active sheet
@@ -57,5 +58,23 @@ wb = openpyxl.Workbook()  # create a blank workbook
 print(wb.sheetnames)  # starts with one sheet
 sheet = wb.active
 print(sheet.title)
-sheet.title = "Spam Bacon Eggs Sheet"  # change sheet name/title
+sheet.title = "Spam Bacon Eggs"  # change sheet name/title
 print(wb.sheetnames)
+wb.create_sheet()
+print(wb.sheetnames)
+wb.create_sheet(index=0, title="First Sheet")
+print(wb.sheetnames)
+del wb["Sheet"]  # delete last sheet
+print(wb.sheetnames)
+# write value to cell
+sheet = wb["First Sheet"]
+sheet["A1"] = "Hello World!"
+print(sheet["A1"].value)
+
+# set font style of cells
+wb = openpyxl.Workbook()  # create a blank workbook
+sheet = wb["Sheet"]
+italic24Font = Font(size=24, italic=True)  # create a font
+sheet["A3"].font = italic24Font  # apply font to A1 cell
+sheet["A3"] = "Hello World!"
+wb.save("../Data/styles.xlsx")
