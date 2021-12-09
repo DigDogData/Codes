@@ -34,8 +34,6 @@ print(
 )
 print("------------------------")
 # compute total
-print(titanic.pivot_table("survived", index="sex", columns="class", margins=True))
-print("------------------------")
 print(
     titanic.pivot_table(
         "survived", index="sex", columns="class", margins_name="Total", margins=True
