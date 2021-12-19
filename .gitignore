@@ -4,6 +4,7 @@
 *.csv
 *.mkv
 *.pdf
+*.rds
 *.webm
 Pipfile*
 Data/
