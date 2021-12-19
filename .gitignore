@@ -3,6 +3,7 @@
 *.log
 *.csv
 *.mkv
+*.pdf
 *.webm
 Pipfile*
 Data/
